@@ -1,6 +1,8 @@
 const listElement = document.querySelector('.posts');
 const postTemplate = document.getElementById('single-post');
-
+const form = document.querySelector('#new-post form');
+const fetchBtn = document.querySelector('#available-posts button');
+const postList = document.querySelector('ul');
 
 function sendHttpRequest(method, url,data) 
 {
@@ -24,11 +26,13 @@ function sendHttpRequest(method, url,data)
 async function fetchPosts() 
 {
     const listOfPosts = await sendHttpRequest('GET','https://jsonplaceholder.typicode.com/posts')
+    listElement.innerHTML = ``;
         // const listOfPosts = responseData;
         for (const post of listOfPosts) {
             const postEl = document.importNode(postTemplate.content, true);
             postEl.querySelector('h2').textContent = post.title.toUpperCase();
             postEl.querySelector('p').textContent = post.body;
+            postEl.querySelector('li').id = post.id;
             listElement.append(postEl);
             // console.log(postEl);
         }
@@ -42,8 +46,37 @@ async function createPost(title,content)
         body:content,
         userId:userId
     };
+    console.log("Post is create and sending...");
     sendHttpRequest('POST','https://jsonplaceholder.typicode.com/posts',post);
 }
-fetchPosts();
-createPost('DUMMY','A Dummy post!');
+// fetchPosts();
+// createPost('DUMMY','A Dummy post!');
 
+fetchBtn.addEventListener('click',fetchPosts);
+form.addEventListener('submit',event =>
+{
+    event.preventDefault();
+    const title = event.target.querySelector('#title').value;
+    const content = event.target.querySelector('#content').value;
+
+    createPost(title,content);
+})
+
+const deleteListItem = (postId) =>
+{
+    const li = document.getElementById(postId);
+    console.log(li);
+    li.remove();
+    // postList.removeChild(li);
+}
+postList.addEventListener('click',event =>
+{
+    if(event.target.tagName === 'BUTTON')
+    {
+        // console.log("You have just clicked on button");
+        const postId = event.target.closest('li').id;
+        // console.log(postId);
+        sendHttpRequest('DELETE',`https://jsonplaceholder.typicode.com/posts/${postId}`);
+        deleteListItem(postId);
+    }
+})
