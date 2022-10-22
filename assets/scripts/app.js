@@ -6,30 +6,48 @@ const postList = document.querySelector('ul');
 
 function sendHttpRequest(method, url,data) 
 {
-    const promise = new Promise((resolved,reject) => {
-        const xhr = new XMLHttpRequest();
-    
-        xhr.open(method, url);
-        xhr.send(JSON.stringify(data));
-        // const listOfPosts = JSON.parse(xhr.response);
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            if(xhr.status >= 200 && xhr.status <300)
+    // const promise = new Promise((resolved,reject) => {
+        // const xhr = new XMLHttpRequest();
+        // xhr.sendRequestHeader('content-type','applicaton/json')
+        // xhr.open(method, url);
+        // xhr.send(JSON.stringify(data));
+        // // const listOfPosts = JSON.parse(xhr.response);
+        // xhr.responseType = 'json';
+        // xhr.onload = function () {
+        //     if(xhr.status >= 200 && xhr.status <300)
+        //     {
+        //         resolved(xhr.response);
+        //     }
+        //     else{
+                    // xhr.response;
+        //         reject(new Error("Something Went Wrong"));
+        //     }
+        //     // console.log(listOfPosts);
+        // }
+        // xhr.onerror = function () 
+        // {
+        //     console.log(xhr.response);
+        //     console.log(xhr.status);
+        // }
+        // });
+        // return promise;
+        return fetch(url,{
+            method:method,
+            // body:JSON.stringify(data),
+            body:data,
+            // headers:{
+            //     'Content-Type':'application/json'
+            // }
+        }).then(response => {
+            if(response.status >=200 && response.status < 300)
             {
-                resolved(xhr.response);
+                return response.json();
             }
             else{
-                reject(new Error("Something Went Wrong"));
+                // response.json();
+                throw new Error('something went wrong- server side.');
             }
-            // console.log(listOfPosts);
-        }
-        xhr.onerror = function () 
-        {
-            console.log(xhr.response);
-            console.log(xhr.status);
-        }
-    })
-    return promise;
+        });
 }
 
 
@@ -37,7 +55,7 @@ function sendHttpRequest(method, url,data)
 async function fetchPosts() 
 {
     try{
-        const listOfPosts = await sendHttpRequest('GET','https://jsonplaceholder.typicode.com/pos')
+        const listOfPosts = await sendHttpRequest('GET','https://jsonplaceholder.typicode.com/posts')
         listElement.innerHTML = ``;
             // const listOfPosts = responseData;
             for (const post of listOfPosts) {
@@ -61,13 +79,16 @@ async function createPost(title,content)
         body:content,
         userId:userId
     };
+    const fd = new FormData(form);
+    // fd.append('title',title);
+    // fd.append('body',content);
+    fd.append('userId',userId);
     console.log("Post is create and sending...");
-    sendHttpRequest('POST','https://jsonplaceholder.typicode.com/posts',post);
+    sendHttpRequest('POST','https://jsonplaceholder.typicode.com/posts',fd);
 }
 // fetchPosts();
 // createPost('DUMMY','A Dummy post!');
 
-fetchBtn.addEventListener('click',fetchPosts);
 form.addEventListener('submit',event =>
 {
     event.preventDefault();
@@ -95,3 +116,4 @@ postList.addEventListener('click',event =>
         deleteListItem(postId);
     }
 })
+fetchBtn.addEventListener('click',fetchPosts);
