@@ -14,8 +14,19 @@ function sendHttpRequest(method, url,data)
         // const listOfPosts = JSON.parse(xhr.response);
         xhr.responseType = 'json';
         xhr.onload = function () {
-            resolved(xhr.response);
+            if(xhr.status >= 200 && xhr.status <300)
+            {
+                resolved(xhr.response);
+            }
+            else{
+                reject(new Error("Something Went Wrong"));
+            }
             // console.log(listOfPosts);
+        }
+        xhr.onerror = function () 
+        {
+            console.log(xhr.response);
+            console.log(xhr.status);
         }
     })
     return promise;
@@ -25,17 +36,21 @@ function sendHttpRequest(method, url,data)
 
 async function fetchPosts() 
 {
-    const listOfPosts = await sendHttpRequest('GET','https://jsonplaceholder.typicode.com/posts')
-    listElement.innerHTML = ``;
-        // const listOfPosts = responseData;
-        for (const post of listOfPosts) {
-            const postEl = document.importNode(postTemplate.content, true);
-            postEl.querySelector('h2').textContent = post.title.toUpperCase();
-            postEl.querySelector('p').textContent = post.body;
-            postEl.querySelector('li').id = post.id;
-            listElement.append(postEl);
-            // console.log(postEl);
-        }
+    try{
+        const listOfPosts = await sendHttpRequest('GET','https://jsonplaceholder.typicode.com/pos')
+        listElement.innerHTML = ``;
+            // const listOfPosts = responseData;
+            for (const post of listOfPosts) {
+                const postEl = document.importNode(postTemplate.content, true);
+                postEl.querySelector('h2').textContent = post.title.toUpperCase();
+                postEl.querySelector('p').textContent = post.body;
+                postEl.querySelector('li').id = post.id;
+                listElement.append(postEl);
+                // console.log(postEl);
+            }
+    }catch(error){
+        console.log(error);
+    }
 }
 
 async function createPost(title,content)
